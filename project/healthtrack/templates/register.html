@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .register-container {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .register-card {
+        max-width: 450px;
+        width: 100%;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        padding: 40px;
+        background: white;
+    }
+    .brand-logo { color: #0066ff; font-weight: 800; font-size: 1.5rem; text-decoration: none; display: block; text-align: center; margin-bottom: 25px; }
+    
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        outline: none;
+    }
+    .helptext, .listinline { font-size: 0.75rem; color: #6c757d; display: block; margin-bottom: 10px; }
+    ul { list-style: none; padding-left: 0; }
+    
+    .btn-register {
+        background-color: #0066ff;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        width: 100%;
+        transition: 0.3s;
+    }
+    .btn-register:hover { background-color: #0052cc; }
+</style>
+
+<div class="register-container">
+    <div class="register-card">
+        
+        
+        <h4 class="fw-bold text-center mb-4">Создать аккаунт</h4>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="mb-2">
+                    <label class="form-label text-muted small fw-bold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="helptext">{{ field.help_text|safe }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-register mt-3">Зарегистрироваться</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="small text-muted">Уже есть аккаунт? <a href="{% url 'login' %}" class="text-primary text-decoration-none fw-bold">Войти</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

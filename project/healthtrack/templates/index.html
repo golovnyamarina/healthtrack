@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    :root {
+        --primary-blue: #0066ff;
+        --bg-light: #f8f9fa;
+    }
+
+    body {
+        background-color: var(--bg-light);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .badge-status {
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+    }
+
+    .btn-save {
+        background-color: var(--primary-blue);
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+    }
+
+    .form-control-lg {
+        border-radius: 10px;
+        background-color: #fcfcfc;
+        border: 1px solid #eee;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Доброе утро, {{ user.first_name|default:user.username }}</h2>
+        <p class="text-muted">Последнее измерение: {{ latest.date|date:"j E Y, H:i" }}</p>
+    </div>
+    <div>
+        <a href="{% url 'export_csv' %}" class="btn btn-outline-primary btn-sm border-0 me-2">
+            <i class="bi bi-download"></i> Экспорт CSV
+        </a>
+        <span class="fw-medium">{{ user.get_full_name }}</span>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="text-muted">Давление</span>
+                {% if latest.is_high %}
+                <span class="badge-status bg-danger-subtle text-danger">Выше нормы</span>
+                {% else %}
+                <span class="badge-status bg-success-subtle text-success">В норме</span>
+                {% endif %}
+            </div>
+            <div class="stat-value mt-2">{{ latest.upper_pressure }}/{{ latest.lower_pressure }}</div>
+            <div class="text-muted">мм рт. ст.</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="text-muted">Пульс</span>
+                <span class="badge-status bg-success-subtle text-success">В диапазоне</span>
+            </div>
+            <div class="stat-value mt-2">{{ latest.pulse }}</div>
+            <div class="text-muted">уд/мин</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100" style="background-color: #fffdf2;">
+            <h6 class="text-muted">Предупреждение</h6>
+            {% if latest.is_high %}
+            <h5 class="fw-bold mt-3">Давление выше личной нормы</h5>
+            <p class="small text-muted">Целевой диапазон задаётся с врачом. Приложение не заменяет консультацию.</p>
+            {% else %}
+            <h5 class="fw-bold mt-3">Показатели в норме</h5>
+            <p class="small text-muted">Продолжайте регулярные измерения для точной статистики.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<div class="card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">Динамика давления</h5>
+    </div>
+    <canvas id="healthChart" height="500"></canvas>
+</div>
+
+<h5 class="fw-bold mb-3">Новое измерение</h5>
+<div class="card p-4">
+    <form method="post" action="{% url 'index' %}" class="row g-3 align-items-end">
+        {% csrf_token %}
+        <div class="col-md-3">
+            <label class="form-label text-muted small">Систолическое (Верхнее)</label>
+            <input type="number" name="upper_pressure" class="form-control form-control-lg" placeholder="145" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small">Диастолическое (Нижнее)</label>
+            <input type="number" name="lower_pressure" class="form-control form-control-lg" placeholder="92" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small">Пульс</label>
+            <input type="number" name="pulse" class="form-control form-control-lg" placeholder="72" required>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary btn-save w-100">Сохранить измерение</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const ctx = document.getElementById('healthChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            label: 'Верхнее',
+            data: {{ upper_pressure_data }},
+        borderColor: '#0066ff',
+        backgroundColor: '#0066ff',
+        borderWidth: 3,
+        tension: 0.3,
+        pointRadius: 0
+            }, {
+            label: 'Нижнее',
+            data: {{ lower_pressure_data }},
+        borderColor: '#ffc107',
+        backgroundColor: '#ffc107',
+        borderWidth: 3,
+        tension: 0.3,
+        pointRadius: 0
+            }]
+        },
+        options: {
+        plugins: { legend: { align: 'end', labels: { boxWidth: 10, usePointStyle: true } } },
+        scales: {
+            y: { min: 60, max: 200, grid: { borderDash: [5, 5] } },
+            x: { grid: { display: false } }
+        }
+    }
+    });
+</script>
+{% endblock %}

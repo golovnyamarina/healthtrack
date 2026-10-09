@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .login-card {
+        max-width: 400px;
+        width: 100%;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        padding: 40px;
+        background: white;
+    }
+    .brand-logo {
+        color: #0066ff;
+        font-weight: 800;
+        font-size: 1.5rem;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .form-control-lg {
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        font-size: 1rem;
+    }
+    .btn-login {
+        background-color: #0066ff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+    .btn-login:hover {
+        background-color: #0052cc;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        
+        <h4 class="fw-bold text-center mb-4">Вход в систему</h4>
+
+        {% if form.errors %}
+            <div class="alert alert-danger small py-2">
+                Неверное имя пользователя или пароль.
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small">Имя пользователя</label>
+                <input type="text" name="username" class="form-control form-control-lg" placeholder="ivan_ivanov" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-muted small">Пароль</label>
+                <input type="password" name="password" class="form-control form-control-lg" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-login w-100">Войти</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="small text-muted">Нет аккаунта? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-bold">Зарегистрироваться</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
